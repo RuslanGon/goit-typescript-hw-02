@@ -1,12 +1,9 @@
-import css from "./ErrorMessage.module.css";
-const ErrorMessage = () => {
-  return (
-    <div>
-      <p className={css.errorMessage}>
-        something went wrong, please reload the page!
-      </p>
-    </div>
-  );
-};
+import { FC } from "react"
 
-export default ErrorMessage;
+const ErrorMessage: FC = () => {
+  return (
+        <p>Whoops, something went wrong! Please try reloading this page!</p>
+  )
+}
+
+export default ErrorMessage
