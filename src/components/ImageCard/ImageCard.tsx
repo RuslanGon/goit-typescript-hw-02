@@ -1,19 +1,23 @@
-import React from "react";
-import css from "./ImageCard.module.css";
+import css from "./ImageCard.module.css"
+import { Photo } from '../../types'
+import { FC} from "react";
 
 interface ImageCardProps {
-  url: string;
-  description: string;
-  urlModal: string;
-  openModal: (url: string, description: string) => void;
+  photo: Photo;
+  openModal: (photo: Photo) => void;
+
 }
 
-const ImageCard: React.FC<ImageCardProps> = ({ url, description, urlModal, openModal }) => {
+const ImageCard:FC<ImageCardProps> = ({ photo,openModal}) => {
+  
   return (
-    <div>
-      <img className={css.gallery_image} src={url} alt={description} onClick={() => openModal(urlModal, description)} />
-    </div>
-  );
-};
+      <div>
+          <img className={css.gallery_image} src={photo.urls.small} alt={photo.alt_description} onClick={()=>openModal(photo)}/>
+      </div>
+  
 
-export default ImageCard;
+
+  )
+}
+
+export default ImageCard

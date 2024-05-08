@@ -1,30 +1,31 @@
-import { useEffect, useState, useRef} from "react";
-import SearchBar from './SearchBar/SearchBar.js';
-import Loader from "./Loader/Loader.js";
-import ErrorMessage from "./ErrorMessage/ErrorMessage.js";
-import ImageGallery from "./ImageGallery/ImageGallery.js";
+import { useEffect, useState, useRef, FC} from "react";
+import SearchBar from './SearchBar/SearchBar.jsx';
+import Loader from "./Loader/Loader.jsx";
+import ErrorMessage from "./ErrorMessage/ErrorMessage.jsx";
+import ImageGallery from "./ImageGallery/ImageGallery.jsx";
 import { fetchPhotosByInput } from "../photos-api.js";
-import LoadMoreBtn from "./LoadMoreBtn/LoadMoreBtn.js";
-import ImageModal from "./ImageModal/ImageModal.js";
+import LoadMoreBtn from "./LoadMoreBtn/LoadMoreBtn.jsx";
+import ImageModal from "./ImageModal/ImageModal.jsx";
 import ScrollIntoView from 'react-scroll-into-view'
-import ScrollUp from "./ScrollUp/ScrollUp.js";
+import ScrollUp from "./ScrollUp/ScrollUp.jsx";
+import { Photo } from '../types.js'
 
 
-const App = () => {
-  const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [inputSearch, setInputSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [showBtn, setShowBtn] = useState(false);
-  const [imageSrc, setImageSrc] = useState(null);
-  const [description, setDescription] = useState(null);
-  const [scrollBtn, setScrollBtn] = useState(false);
-  const lastImageRef = useRef(null);
+const App:FC = () => {
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+  const [inputSearch, setInputSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [showBtn, setShowBtn] = useState<boolean>(false);
+  const [scrollBtn, setScrollBtn] = useState<boolean>(false);
+  const lastImageRef = useRef<HTMLLIElement | null>(null);
+  const [modal, setModal] = useState<boolean>(false);
+  const [photo, setPhoto] = useState<Photo|null>(null);
 
-useEffect(() => {
+useEffect(():void | (() => void) => {
     if (!inputSearch) return;
-    async function fetchPhotos()  {
+    async function fetchPhotos():Promise<void>|never{
     try {
       setLoading(true);
       setError(false);
@@ -39,38 +40,39 @@ useEffect(() => {
       }
     }
   fetchPhotos();
-  scrollToLastImage();
+
     
 }, [inputSearch, page])
   
-const onSubmit = (inputSearch) => {
+const onSubmit = (inputSearch:string): void => {
   setInputSearch(inputSearch);
   setPhotos([]);
   setPage(1);
   setShowBtn(false);
 }
 
-const scrollToLastImage = () => {
-  if (lastImageRef.current) {
-  lastImageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-   }
-};
-  const onClickButton = () => {
+  useEffect(():void | (() => void) => {
+    if (lastImageRef.current) {
+      lastImageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [photos]); 
+  const onClickButton = (): void => {
     setPage((prevPage) => prevPage + 1);
     setScrollBtn(true);
   };
 
-  const openModal = (urlModal,description) => {
-    setImageSrc(urlModal);
-    setDescription(description);
-  };
+  const openModal = (photo: Photo): void => {
+  setPhoto(photo);
+  setModal(true);
+   };
 
-  const closeModal = () => {
-    setImageSrc(null)
-  };
+  const closeModal = (): void => {
+  setPhoto(null);
+  setModal(false);
+   };
 
 
-  const onScrollBtn = () => {
+  const onScrollBtn = (): void => {
     setScrollBtn(false)
   };
 
@@ -79,11 +81,10 @@ const scrollToLastImage = () => {
       <SearchBar onSubmit={onSubmit} />
       {loading && <Loader />}
       {error && <ErrorMessage />}
-      {photos.length !== 0 && <ImageGallery photos={photos} openModal={openModal} lastImageRef={lastImageRef}  onClickButton={onClickButton} />}
+      {photos.length !== 0 && <ImageGallery photos={photos} openModal={openModal} lastImageRef={lastImageRef}/>}
       {showBtn && <LoadMoreBtn onClickButton={onClickButton} />}
-      <ImageModal isOpen={imageSrc !== null} onClose={closeModal} urlModal={imageSrc} description={description} />
       {scrollBtn && <ScrollIntoView selector="#header"><ScrollUp onScrollBtn={onScrollBtn} /></ScrollIntoView>}
-    
+      {modal && photo!==null &&<ImageModal onClose={closeModal} photo={photo} />}
     </>
   );
 };
